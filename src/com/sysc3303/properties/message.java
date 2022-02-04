@@ -1,13 +1,17 @@
-import java.util.*;
+package com.sysc3303.properties;
+
+import java.time.LocalTime;
+import java.io.Serializable;
 
 /**
  * Message - A message class that contains all four parameters input by the message file.
  * @author linpuliu
  *
  */
-class Message {
+public class Message implements Data, Serializable {
+	   private static final long serialVersionUID = 1L;
        
-	   private Date date;     //Time stamp of when the button is pressed.
+	   private LocalTime date;     //Time stamp of when the button is pressed.
        private int floor;     //Floor on which the passenger is making a request
        private String floorButton;     // A String representing up or down, null is accepted when at lowest/highest floor.
        private int carButton;   // Floor button within the elevator which is providing service to the passenger. 
@@ -19,7 +23,7 @@ class Message {
     * @param floorButton
     * @param carButton
     */
-   public Message(Date date, int floor, String floorButton, int carButton) {
+   public Message(LocalTime date, int floor, String floorButton, int carButton) {
       this.date = date;
       this.floor = floor;
       if(floorButton == "Up" || floorButton == "Down" || floorButton == null) {
@@ -32,7 +36,7 @@ class Message {
         * Get the Date of the message.
         * @return Date
         */
-       public Date getDate() { 
+       public LocalTime getDate() { 
     	   return date; }
        
        /**
