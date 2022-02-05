@@ -3,6 +3,7 @@ package com.sysc3303;
 import java.util.Scanner;
 
 import com.sysc3303.properties.Message;
+import com.sysc3303.properties.Systems;
 import com.sysc3303.properties.Data;
 
 
@@ -81,8 +82,8 @@ public class Floor implements Runnable {
             final String direction = tempData[2];
 
             try {
-                // Creates PassengerEvent and converts it into a byte array
-                messageToSend = new Message(time, floor, direction, carButton);
+                // Creates Message and converts it into a byte array
+                messageToSend = new Message(time, floor, direction, carButton, Systems.FLOOR, Systems.SCHEDULER);
                 byte[] bufSend = Data.toByteArray(messageToSend);
 
                 sendPacket = new DatagramPacket(bufSend, bufSend.length, ip, port);
@@ -94,23 +95,32 @@ public class Floor implements Runnable {
                 socket.send(sendPacket);
 
                 System.out.println("Floor: Packet sent.\n");
-
-                byte[] bufReceived = new byte[1024];
-                receivePacket = new DatagramPacket(bufReceived, bufReceived.length);
-                socket.receive(receivePacket);
-
-                System.out.println("Floor: Packet received:");
-                System.out.println("Floor From host: " + receivePacket.getAddress());
-                System.out.println("Floor Host port: " + receivePacket.getPort());
-
-                // For iteration 1, received data is a Passenger event that was sent initially.
-                // This will be changed in future iterations.
-                try {
-                    receivedMessage = (Message) Data.fromByteArray(receivePacket.getData());
-                } catch (ClassNotFoundException ce) {
-                    ce.printStackTrace();
+                
+                while(true) {
+                	
+                    byte[] bufReceived = new byte[1024];
+                    receivePacket = new DatagramPacket(bufReceived, bufReceived.length);
+                    socket.receive(receivePacket);
+                    
+                    // For iteration 1, received data is a Passenger event that was sent initially.
+                    // This will be changed in future iterations.
+                    try {
+                        receivedMessage = (Message) Data.fromByteArray(receivePacket.getData());
+                    } catch (ClassNotFoundException ce) {
+                        ce.printStackTrace();
+                    }
+                    
+                    if(receivedMessage.getReceiver() == Systems.FLOOR) {
+                    	
+                    	System.out.println("Floor: Packet received:");
+                    	System.out.println("Floor From host: " + receivePacket.getAddress());
+                    	System.out.println("Floor Host port: " + receivePacket.getPort());
+                    	System.out.println(receivedMessage);
+                    	break;
+                    }
+                	
                 }
-                System.out.println(receivedMessage);
+                
     
 
             } catch (IOException e) {
