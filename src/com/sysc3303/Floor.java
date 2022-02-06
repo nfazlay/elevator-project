@@ -79,7 +79,7 @@ public class Floor implements Runnable {
             final LocalTime time = LocalTime.parse(tempData[0]);
             final int floor = Integer.parseInt(tempData[1]);
             final int carButton = Integer.parseInt(tempData[3]);
-            final String direction = tempData[2];
+            final String direction = (String) tempData[2];
 
             try {
                 // Creates Message and converts it into a byte array
@@ -91,6 +91,7 @@ public class Floor implements Runnable {
                 System.out.println("Floor: Sending packet.....");
                 System.out.println("Floor Host Address: " + sendPacket.getAddress());
                 System.out.println("Floor Destination host port: " + sendPacket.getPort());
+                System.out.println("Floor Message data: " + messageToSend);
 
                 socket.send(sendPacket);
 
@@ -115,7 +116,7 @@ public class Floor implements Runnable {
                     	System.out.println("Floor: Packet received:");
                     	System.out.println("Floor From host: " + receivePacket.getAddress());
                     	System.out.println("Floor Host port: " + receivePacket.getPort());
-                    	System.out.println(receivedMessage);
+                    	System.out.println(receivedMessage + "\n");
                     	break;
                     }
                 	
