@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class Message implements Data, Serializable {
 	   private static final long serialVersionUID = 1L;
        
+	   private String message = "";
 	   private LocalTime date;     //Time stamp of when the button is pressed.
        private int floor;     //Floor on which the passenger is making a request
        private String floorButton;     // A String representing up or down, null is accepted when at lowest/highest floor.
@@ -26,12 +27,15 @@ public class Message implements Data, Serializable {
     * @param carButton
     * @param Sender
     */
+       
+   public Message(String message) {
+	   this.message = message;
+   }
    public Message(LocalTime date, int floor, String floorButton, int carButton, Systems sender, Systems receiver) {
       this.date = date;
       this.floor = floor;
-      if(floorButton == "Up" || floorButton == "Down" || floorButton == null) {
-    		  this.floorButton = floorButton;           //Only accepting Up, down and null.
-      }
+      //System.out.println("Message: " + floorButton);
+      this.floorButton = floorButton;
       this.carButton = carButton;
       this.sender = sender;
       this.receiver = receiver;
@@ -63,6 +67,13 @@ public class Message implements Data, Serializable {
         */
        public int getcB() { 
     	   return carButton; }
+       
+       /**
+        * Get the message.
+        * @return message
+        */
+       public String getMessage() { 
+    	   return message; }
        
        /**
         * Get the Sender of the request.
