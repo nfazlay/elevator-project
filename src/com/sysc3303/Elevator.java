@@ -87,7 +87,7 @@ public class Elevator implements Runnable {
         
         System.out.println("Elevator: Packet sent.\n");
         
-        System.out.println("Closing Floor socket");
+        System.out.println("Closing Elevator socket\n");
         socket.close();
         	
     }
