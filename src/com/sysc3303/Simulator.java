@@ -3,6 +3,8 @@ package com.sysc3303;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import com.sysc3303.Elevator.Elevator;
+
 public class Simulator {
 
 	public static void main(String[] args) throws SocketException, UnknownHostException {
