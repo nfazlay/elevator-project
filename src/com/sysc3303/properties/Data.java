@@ -9,11 +9,17 @@ import java.io.ObjectOutputStream;
 
 /**
  * 
- * The Event interface is responsible of retrieving the user's information when interacting with the elevator
- * and converting the information to and from a bytearray.
+ * The Data Class is responsible for converting the information to and from a bytearray.
  *
  */
-public interface Data {
+public abstract class Data {
+	
+	public abstract MessageType getType();
+	public abstract void setSender(Systems sender);
+	public abstract void setReceiver(Systems receiver);
+	public abstract Systems getSender();
+	public abstract Systems getReceiver();
+	
 	/**
 	 * Converts the event object to a byte array.
 	 * 
