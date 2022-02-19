@@ -5,6 +5,7 @@ import com.sysc3303.properties.MessageType;
 import com.sysc3303.properties.OkMessage;
 import com.sysc3303.properties.StateMessage;
 import com.sysc3303.properties.Systems;
+import com.sysc3303.properties.Timing;
 import com.sysc3303.properties.Data;
 import com.sysc3303.properties.Helper;
 
@@ -69,7 +70,8 @@ public class Elevator implements Runnable {
 //        socket.send(sendPacket);
                 
         while(true) {
-        	Thread.sleep(1*1000);
+        	
+        	Thread.sleep(Timing.DEFAULT.getTime()*1000);
 	    	
 	    	if(!requests.isEmpty() && currState == ElevatorStates.STATIONARY) {//requests available
 	    		lamp = requests.peek().getCarButton();
@@ -95,6 +97,7 @@ public class Elevator implements Runnable {
 	    			//send to scheduler
 	    			break;
 	    		case CLOSEDOOR:
+	    			Thread.sleep(Timing.CLOSEDOOR.getTime()*1000);
 	    			//MOVE or STATIONARY
 	    			if(lamp == -1) {//passenger served
 	    				requests.poll();//remove message
@@ -108,6 +111,7 @@ public class Elevator implements Runnable {
 	    			//send to scheduler
 	    			break;
 	    		case MOVING:
+	    			Thread.sleep(Timing.MOVE.getTime()*1000);
 	    			//Keep Moving till floor reached
 	    			if(!passenger) {
 	    				if(currFloor != floor) {
@@ -125,8 +129,6 @@ public class Elevator implements Runnable {
 	    			}
 	    			else {
 	    				if(lamp != -1) {
-	    					System.out.println(dir);
-	    					System.out.println(lamp);
 	    					if(dir.equals("Up")) {//requested to go up
 	    						currFloor++;
 	    					}
@@ -148,6 +150,7 @@ public class Elevator implements Runnable {
 	    			break;
 	    		case OPENDOOR:
 	    			//Close door
+	    			Thread.sleep(Timing.OPENDOOR.getTime()*1000);
 	    			currState = ElevatorStates.CLOSEDOOR;
 	    			//send to scheduler
 	    			break;
