@@ -33,7 +33,7 @@ public class Floor implements Runnable {
     private InetAddress ip;
     private DatagramSocket socket;
     private int port;
-    private DatagramPacket sendPacket, receivePacket;
+    private DatagramPacket sendPacket;
     protected Message receivedMessage, messageToSend;
     private Scanner sc;
 
@@ -88,48 +88,21 @@ public class Floor implements Runnable {
 
                 sendPacket = new DatagramPacket(bufSend, bufSend.length, ip, port);
 
-                System.out.println("Floor: Sending packet.....");
-                System.out.println("Floor Host Address: " + sendPacket.getAddress());
-                System.out.println("Floor Destination host port: " + sendPacket.getPort());
-                System.out.println("Floor Message data: " + messageToSend);
+                System.out.println("FLOOR: Sending packet.....");
+                System.out.println("FLOOR: Destination Host Address: " + sendPacket.getAddress());
+                System.out.println("FLOOR: Destination host port: " + sendPacket.getPort());
+                System.out.println("FLOOR: Packet data: " + messageToSend);
 
                 socket.send(sendPacket);
 
-                System.out.println("Floor: Packet sent.\n");
+                System.out.println("Floor: Packet sent\n");
                 
-                while(true) {
-                	
-                    byte[] bufReceived = new byte[1024];
-                    receivePacket = new DatagramPacket(bufReceived, bufReceived.length);
-                    socket.receive(receivePacket);
-                    
-                    // For iteration 1, received data is a Passenger event that was sent initially.
-                    // This will be changed in future iterations.
-                    try {
-                        receivedMessage = (Message) Data.fromByteArray(receivePacket.getData());
-                    } catch (ClassNotFoundException ce) {
-                        ce.printStackTrace();
-                    }
-                    
-                    if(receivedMessage.getReceiver() == Systems.FLOOR) {
-                    	
-                    	System.out.println("Floor: Packet received:");
-                    	System.out.println("Floor From host: " + receivePacket.getAddress());
-                    	System.out.println("Floor Host port: " + receivePacket.getPort());
-                    	System.out.println(receivedMessage + "\n");
-                    	break;
-                    }
-                	
-                }
-                
-    
-
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
         }
-        System.out.println("Closing Floor socket");
+        System.out.println("FLOOR: Closing Floor socket\n");
         socket.close();
     }
 
