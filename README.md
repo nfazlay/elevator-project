@@ -29,3 +29,4 @@
 - Each iteration of the elevator takes 1 second
 
 ## Test instructions
+   The Test Domcument is located at the default package directory, After loading the project, use Run TestElevator of Unit JUnit to run. 
