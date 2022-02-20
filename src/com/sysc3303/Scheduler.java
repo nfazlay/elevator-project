@@ -1,77 +1,145 @@
-  import java.io.IOException;
-	import java.net.DatagramPacket;
-	import java.net.DatagramSocket;
-	import java.net.SocketException;
-	
-	
-public class Scheduler implements Runnable{
-	
-	DatagramPacket Receive = null;
-	byte[] buffer = new byte[1024];
-	DatagramSocket socket;
-	DatagramPacket receivedPacket, sentPacket;
-	Message received;
-	
-	public Scheduler() {
-		try {
-			socket = new DatagramSocket(8080);
-			
-        } catch (SocketException exception) {
-            exception.printStackTrace();
-        }
-	}
-	
-	public void start() {
-		while (true)
-        {
-            Receive = new DatagramPacket(buffer, buffer.length);
-  
-            try {
-				socket.receive(Receive);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-  
-            try {
-                received = (Message) Data.fromByteArray(Receive.getData());
-            } catch (ClassNotFoundException e ) {
-                e.printStackTrace();
-            } catch (IOException e) {
-				e.printStackTrace();
-			}
-            
-            
-            System.out.println("Packet received from " + received.getSender());
-            System.out.println("From " + Receive.getAddress());
-            System.out.println("Port: " + Receive.getPort());
-            System.out.println(received);
-            System.out.println("Will be sent to the host....");
-            	
-            try{
-            	byte[] sentBuffer = Data.toByteArray(received);
-            	sentPacket = new DatagramPacket(sentBuffer, sentBuffer.length, Receive.getAddress(), Receive.getPort());
-            	System.out.println("Sent successed");
-            	} catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println("Sent failed");
-                }
-            } 
-            	
-        	
-        
-        }
-    
-	public static void main(String args[]) throws IOException {
-        Scheduler scheduler = new Scheduler();
-        scheduler.start();
-    }
+package com.sysc3303;
 
+import java.io.*;
+
+import java.net.*;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import com.sysc3303.properties.Data;
+import com.sysc3303.properties.Helper;
+import com.sysc3303.properties.StateMessage;
+import com.sysc3303.properties.Message;
+import com.sysc3303.properties.OkMessage;
+import com.sysc3303.properties.Systems;
+ 
+/**
+ * Scheduler Class that implements the runnable
+ * 
+ * @version 1.2
+ */
+public class Scheduler implements Runnable {
+    private DatagramSocket socket;
+    private DatagramPacket receivePacket;
+    protected Data message, done;
+    private Queue<DatagramPacket> floorPackets = new LinkedList<DatagramPacket>();
+    
+    /**
+     * Constructor for Scheduler server
+     * 
+     * @param port Port to int to
+     * @throws SocketException
+     * @throws UnknownHostException
+     */
+    public Scheduler(int port) throws SocketException, UnknownHostException {
+        socket = new DatagramSocket(port);
+        socket.setSoTimeout(10*1000);//10 seconds
+    }
+ 
+    public static void main(String[] args) {
+		Scheduler s;
+		try {
+			s = new Scheduler(8080);
+			s.start();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    /**
+     * Sends and receives packets from clients
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    @SuppressWarnings("incomplete-switch")
+	private void start() throws IOException, ClassNotFoundException{
+    	try {
+    		while (true) {
+    			
+    			System.out.println("SCHEDULER: Waiting for packet...\n");
+    			byte[] bufReceived = new byte[1024];
+    			receivePacket = new DatagramPacket(bufReceived, bufReceived.length);
+    			socket.receive(receivePacket);
+    			
+    			try {
+    				message = (Data) Data.fromByteArray(receivePacket.getData());
+    			} catch (ClassNotFoundException ce) {
+    				ce.printStackTrace();
+    			}
+    			
+    			System.out.println("SCHEDULER: Received packet from: " + message.getSender());
+    			System.out.println("SCHEDULER: Packet data: " + message);
+    			
+    			switch(message.getSender()) {
+					case ELEVATOR:
+						switch(((StateMessage) message).getState()){
+							case STATIONARY:
+								//give task
+								if(!floorPackets.isEmpty()) {
+									//add more logic when more elevators
+									Message req = (Message) Data.fromByteArray(floorPackets.poll().getData());
+									sendToSystem(req, Systems.ELEVATOR, receivePacket);
+									
+								}
+								else {// no packets
+									done  = new OkMessage("Cool");
+									sendToSystem(done, Systems.ELEVATOR, receivePacket);
+								}
+								break;
+							case MOVING:
+								//add logic to see if going the same direction and pick up passenger
+								//if going the same direction and above/below the pickup floor
+								//pickup the passenger respectedly
+								done  = new OkMessage("Cool");
+								sendToSystem(done, Systems.ELEVATOR, receivePacket);
+								break;
+							case OPENDOOR:
+								done  = new OkMessage("Cool");
+								sendToSystem(done, Systems.ELEVATOR, receivePacket);
+								break;
+							case CLOSEDOOR:
+								// in future: if request
+									//remove from floorreq
+									//send to floor
+								done  = new OkMessage("Cool");
+								sendToSystem(done, Systems.ELEVATOR, receivePacket);
+								break;
+						}						
+						break;
+					case FLOOR:
+						floorPackets.add(receivePacket);
+						break;
+				}
+    		}
+    	}
+    	catch (SocketTimeoutException ex) {
+            System.out.println("SCHEDULER: Closing Scheduler socket due to inactivity");
+            socket.close();
+    	}
+        	
+    }
+    
+    /**
+     * Calls Helper class method to pack data and send
+     * 
+     * @param message Data object
+     * @param system System to send data
+     * @param packet Packet previously received from client
+     * @throws IOException
+     */
+    public void sendToSystem(Data message, Systems system, DatagramPacket packet) throws IOException {
+    	DatagramPacket sendPacket = Helper.sendPacket(message, Systems.SCHEDULER, system, packet.getAddress(), packet.getPort());
+    	socket.send(sendPacket);
+    }
+    
     @Override
     public void run() {
-        start();
+        try {
+			start();
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
-	
-	
-	
-	
 }
