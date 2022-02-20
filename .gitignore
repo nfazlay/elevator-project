@@ -1,6 +1,9 @@
 # ignore bin
 bin
 
+# ignore idea
+.idea
+
 # Compiled class file
 *.class
 
