@@ -14,18 +14,23 @@ import com.sysc3303.properties.OkMessage;
 import com.sysc3303.properties.Systems;
  
 /**
- * Java Scheduler
- *
- *
+ * Scheduler Class that implements the runnable
  * 
+ * @version 1.2
  */
 public class Scheduler implements Runnable {
     private DatagramSocket socket;
     private DatagramPacket receivePacket;
     protected Data message, done;
     private Queue<DatagramPacket> floorPackets = new LinkedList<DatagramPacket>();
-    //private Queue<DatagramPacket> elevPackets = new LinkedList<DatagramPacket>();
     
+    /**
+     * Constructor for Scheduler server
+     * 
+     * @param port Port to int to
+     * @throws SocketException
+     * @throws UnknownHostException
+     */
     public Scheduler(int port) throws SocketException, UnknownHostException {
         socket = new DatagramSocket(port);
         socket.setSoTimeout(10*1000);//10 seconds
@@ -41,6 +46,12 @@ public class Scheduler implements Runnable {
 		}
     }
     
+    /**
+     * Sends and receives packets from clients
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @SuppressWarnings("incomplete-switch")
 	private void start() throws IOException, ClassNotFoundException{
     	try {
@@ -70,9 +81,6 @@ public class Scheduler implements Runnable {
 									Message req = (Message) Data.fromByteArray(floorPackets.poll().getData());
 									sendToSystem(req, Systems.ELEVATOR, receivePacket);
 									
-									//send to floor to switch lamp off
-//									done  = new OkMessage("Turn Off Lamp");
-//									sendToSystem(done, Systems.FLOOR, floorPackets.poll());
 								}
 								else {// no packets
 									done  = new OkMessage("Cool");
@@ -112,6 +120,14 @@ public class Scheduler implements Runnable {
         	
     }
     
+    /**
+     * Calls Helper class method to pack data and send
+     * 
+     * @param message Data object
+     * @param system System to send data
+     * @param packet Packet previously received from client
+     * @throws IOException
+     */
     public void sendToSystem(Data message, Systems system, DatagramPacket packet) throws IOException {
     	DatagramPacket sendPacket = Helper.sendPacket(message, Systems.SCHEDULER, system, packet.getAddress(), packet.getPort());
     	socket.send(sendPacket);

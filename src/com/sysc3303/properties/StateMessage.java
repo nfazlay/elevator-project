@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.sysc3303.Elevator.ElevatorStates;
 
 /**
- * Message - A message class that contains all four parameters input by the message file.
+ * StateMessage Class extends Data
  *
  */
 public class StateMessage extends Data implements Serializable {
@@ -18,7 +18,7 @@ public class StateMessage extends Data implements Serializable {
 	   private Systems receiver;
 
    /**
-    * Constructor of the message class
+    * Constructor of the StateMessage class
     */
        
    public StateMessage(ElevatorStates state, int currFloor) {
@@ -28,53 +28,59 @@ public class StateMessage extends Data implements Serializable {
    }
    /**
     * Get the state.
-    * @return state
+    * 
+    * @return ElevatorStates state
     */
    public ElevatorStates getState() { 
 	   return state; }
    /**
     * Get current floor
-    * @return currfloor
+    * @return int currfloor
     */
    public int getFloor() {
 	   return currFloor;
    }
    
-   @Override
-	public MessageType getType() {
+  	/**
+  	 * Get Type of Message
+  	 * 
+  	 * @return MessageType type
+  	 */
+  	public MessageType getType() {
 		return type;
 	}
-		
-	/**
-	 * Get the Sender of the request.
-	 * @return sender
-	 */
-   @Override
-	public Systems getSender() { 
+	
+   /**
+    * Get the Sender of the request.
+    * 
+    * @return sender
+    */
+   public Systems getSender() { 
 	   return sender; }
-	
-	/**
-	 * Get the receiver of the request.
-	 * @return receiver
-	 */
-   @Override
-	public Systems getReceiver() { 
+
+   /**
+    * Get the receiver of the request.
+    * 
+    * @return receiver
+    */
+   public Systems getReceiver() { 
 	   return receiver; }
-	/**
-	 * Get the Sender of the request.
-	 * @return sender
-	 */
-	
+   /**
+    * Set the Sender of the request.
+    * 
+    * @param sender
+    */
    @Override
-	public void setSender(Systems sender) { 
+   public void setSender(Systems sender) { 
 	    this.sender = sender ; }
-	
-	/**
-	 * Get the receiver of the request.
-	 * @return receiver
-	 */
+
+   /**
+    * Set the receiver of the request.
+    * 
+    * @param receiver
+    */
    @Override
-	public void setReceiver(Systems receiver) { 
+   public void setReceiver(Systems receiver) { 
 	    this.receiver = receiver; }
    
    /**
@@ -83,7 +89,7 @@ public class StateMessage extends Data implements Serializable {
     */
    @Override
    public String toString() { 
-	   return "Current State: " + state.getState() + "|| Current Floor: " + currFloor; 
+	   return "Current State: " + state.getState() + " || Current Floor: " + currFloor; 
    }
    
 }

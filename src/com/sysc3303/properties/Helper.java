@@ -4,7 +4,22 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 
+/**
+ * Helper interface to implement helper methods
+ *
+ */
 public interface Helper {
+    /**
+     * Packs data to be sent over UDP
+     * 
+     * @param message Data to send
+     * @param sender Sending System
+     * @param receiver Receiving System
+     * @param address InetAddress to send
+     * @param port Port to send
+     * @return DatagramPacket
+     * @throws IOException
+     */
     public static DatagramPacket sendPacket(Data message, Systems sender, Systems receiver, InetAddress address, int port) throws IOException {
 		message.setReceiver(receiver);
 		message.setSender(sender);

@@ -1,8 +1,19 @@
 package com.sysc3303.properties;
 
 /**
- * Convenience ENUM for Elevator and Floor Values
+ * Convenience ENUM for Subsystems
  */
 public enum Systems {
-	ELEVATOR, FLOOR, SCHEDULER
+	/**
+	 * Elevator subsystem
+	 */
+	ELEVATOR, 
+	/**
+	 * Floor Subsystem
+	 */
+	FLOOR, 
+	/**
+	 * Scheduler Subsystem
+	 */
+	SCHEDULER
 }

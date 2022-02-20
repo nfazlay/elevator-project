@@ -19,7 +19,9 @@ import java.util.Queue;
 import java.net.SocketException;
 
 /**
+ * Elevator Class that implements the runnable interface
  * 
+ * @version 1.2
  *
  */
 public class Elevator implements Runnable {
@@ -38,6 +40,10 @@ public class Elevator implements Runnable {
     private boolean passenger;
     
 
+    /**
+     * Elevator Class Constructor
+     * 
+     */
     public Elevator() {
     	passenger = false;
     	currState = ElevatorStates.STATIONARY;
@@ -53,6 +59,13 @@ public class Elevator implements Runnable {
         }
     }
     
+    /**
+     * Binds to server and sends and receives data
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws InterruptedException
+     */
     public void start() throws IOException, ClassNotFoundException, InterruptedException {
 
         try {
@@ -63,11 +76,6 @@ public class Elevator implements Runnable {
             e.printStackTrace();
             System.exit(1);
         }
-        
-//        Message initMessage = new Message("Hello Scheduler");
-//        byte[] initBuf = Data.toByteArray(initMessage);
-//        sendPacket = new DatagramPacket(initBuf, initBuf.length, ip, port);
-//        socket.send(sendPacket);
                 
         while(true) {
         	
@@ -176,8 +184,8 @@ public class Elevator implements Runnable {
             System.out.println("ELEVATOR: Packet received from: "+ receivedMessage.getSender());
             System.out.println("ELEVATOR: From host address: " + receivePacket.getAddress());
             System.out.println("ELEVATOR: From host port : " + receivePacket.getPort());
-            //if type Request, add to queue
             //check data type
+            //if type Request, add to queue
             if(receivedMessage.getType() == MessageType.REQUEST) {
             	requests.add((Message) receivedMessage);
             	System.out.println("ELEVATOR: Packet data: " + ((Message)receivedMessage) + "\n");
@@ -190,6 +198,14 @@ public class Elevator implements Runnable {
 //        socket.close();
     }
     
+    /**
+     * Packs data and sends to Server
+     * 
+     * @param message Data to send
+     * @param system Receiving System
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void sendToSystem(Data message, Systems system) throws IOException, ClassNotFoundException {
     	DatagramPacket sendPacket = Helper.sendPacket(message, Systems.ELEVATOR, system, ip, port);
     	socket.send(sendPacket);

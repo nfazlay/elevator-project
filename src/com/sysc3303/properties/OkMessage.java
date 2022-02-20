@@ -2,7 +2,7 @@ package com.sysc3303.properties;
 import java.io.Serializable;
 
 /**
- * Message - A message class that contains all four parameters input by the message file.
+ * OkMessage Class extends Data
  *
  */
 public class OkMessage extends Data implements Serializable {
@@ -16,53 +16,57 @@ public class OkMessage extends Data implements Serializable {
    /**
     * Constructor of the message class
     */
-       
    public OkMessage(String message) {
 	   this.type = MessageType.OK;
 	   this.message = message;
    }
    /**
-    * Get the message.
-    * @return message
-    */
+	* Get the message.
+	* @return message
+	*/
    public String getMessage() { 
 	   return message; }
    
-   @Override
-	public MessageType getType() {
+  	/**
+  	 * Get Type of Message
+  	 * 
+  	 * @return MessageType type
+  	 */
+  	public MessageType getType() {
 		return type;
 	}
-		
-	/**
-	 * Get the Sender of the request.
-	 * @return sender
-	 */
-   @Override
-	public Systems getSender() { 
+	
+   /**
+    * Get the Sender of the request.
+    * 
+    * @return sender
+    */
+   public Systems getSender() { 
 	   return sender; }
-	
-	/**
-	 * Get the receiver of the request.
-	 * @return receiver
-	 */
-   @Override
-	public Systems getReceiver() { 
+
+   /**
+    * Get the receiver of the request.
+    * 
+    * @return receiver
+    */
+   public Systems getReceiver() { 
 	   return receiver; }
-	/**
-	 * Get the Sender of the request.
-	 * @return sender
-	 */
-	
+   /**
+    * Set the Sender of the request.
+    * 
+    * @param sender
+    */
    @Override
-	public void setSender(Systems sender) { 
+   public void setSender(Systems sender) { 
 	    this.sender = sender ; }
-	
-	/**
-	 * Get the receiver of the request.
-	 * @return receiver
-	 */
+
+   /**
+    * Set the receiver of the request.
+    * 
+    * @param receiver
+    */
    @Override
-	public void setReceiver(Systems receiver) { 
+   public void setReceiver(Systems receiver) { 
 	    this.receiver = receiver; }
    
    /**

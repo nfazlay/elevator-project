@@ -19,14 +19,8 @@ import java.net.SocketException;
 import java.io.File;
 
 /**
- * 
  * The Floor class creates the floor subsystem.
- * It is responsible of retrieving elevator information by line from the input file, 
- * parsing an Event with the information into a byte array and
- * sending the Event to the Scheduler. Afterwards, it waits in response for the 
- * Scheduler to return the event. Once it is returned, the
- * Floor will repeat this cycle until there are no more 
- * lines to read from the input file.
+ * @version 1.2
  *
  */
 public class Floor implements Runnable {
@@ -37,6 +31,9 @@ public class Floor implements Runnable {
     protected Message receivedMessage, messageToSend;
     private Scanner sc;
 
+    /**
+     * Constructor for Floor
+     */
     public Floor() {
         try {
             // Construct a datagram socket and bind it to any available port on the local host machine. 
@@ -48,7 +45,9 @@ public class Floor implements Runnable {
         }
     }
 
-    
+    /**
+     * Binds to ip and starts the server
+     */
     public void start() {
 
         try {
@@ -69,7 +68,8 @@ public class Floor implements Runnable {
             fe.printStackTrace();
         }
 
-        // Communicates with the server by sending and receiving data until all lines in the input file are read
+        // Communicates with the server by sending and receiving 
+        // data until all lines in the input file are read
         while (sc.hasNextLine()) {
             
         	// Parses data into string array
@@ -95,7 +95,7 @@ public class Floor implements Runnable {
 
                 socket.send(sendPacket);
 
-                System.out.println("Floor: Packet sent\n");
+                System.out.println("FLOOR: Packet sent\n");
                 
             } catch (IOException e) {
                 e.printStackTrace();

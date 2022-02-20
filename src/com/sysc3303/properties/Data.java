@@ -21,10 +21,10 @@ public abstract class Data {
 	public abstract Systems getReceiver();
 	
 	/**
-	 * Converts the event object to a byte array.
+	 * Converts the data object to a byte array.
 	 * 
-	 * @param obj
-	 * @return
+	 * @param obj Object
+	 * @return byte[]
 	 * @throws IOException
 	 */
 	public static byte[] toByteArray(Object obj) throws IOException {
@@ -36,7 +36,7 @@ public abstract class Data {
 	}
 
 	/**
-	 * Converts the byte array to an event object.
+	 * Converts the byte array to a data object.
 	 * 
 	 * @param byteArr
 	 * @return
