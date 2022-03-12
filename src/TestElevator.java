@@ -9,9 +9,9 @@ import java.util.Scanner;
 import org.junit.Assert;
 import org.junit.Test;
 import com.sysc3303.Floor;
-import com.sysc3303.Scheduler;
 import com.sysc3303.Elevator.Elevator;
 import com.sysc3303.Elevator.ElevatorStates;
+import com.sysc3303.Scheduler.Scheduler;
 import com.sysc3303.properties.StateMessage;
 /**
 *
@@ -35,7 +35,7 @@ public class TestElevator {
 		System.out.println(String.format("----- Testing Elevator System -----"));
 		
 		final Scheduler server = new Scheduler(8080);
-		final Elevator elevator = new Elevator();
+		final Elevator elevator = new Elevator(1);
 		final Floor floor = new Floor();
 		
 		//The two boolean indicator initially set to true.
