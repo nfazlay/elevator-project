@@ -1,6 +1,7 @@
 package com.sysc3303.Elevator;
 
 import com.sysc3303.properties.Message;
+
 import com.sysc3303.properties.MessageType;
 import com.sysc3303.properties.OkMessage;
 import com.sysc3303.properties.StateMessage;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.net.SocketException;
+import java.util.Random;
 
 /**
  * Elevator Class that implements the runnable interface
@@ -216,7 +218,9 @@ public class Elevator implements Runnable {
     }
 
     public static void main(String args[]) throws IOException, ClassNotFoundException, InterruptedException {
-        Elevator c = new Elevator(1);
+    	Random rand = new Random();
+    	int id = rand.nextInt(100);
+        Elevator c = new Elevator(id);
         c.start();
     }
 

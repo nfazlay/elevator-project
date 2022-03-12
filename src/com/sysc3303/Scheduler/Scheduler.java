@@ -172,8 +172,8 @@ public class Scheduler implements Runnable {
     
     /**
      * Get the probability to send data to elevator depending to it's state
-     * @param currPos Position of the elevator
-     * @param request Data
+     * @param currPos StateMessage Position of the elevator
+     * @param request Message Data
      * @return Double probablilty
      * @throws IOException
      */
