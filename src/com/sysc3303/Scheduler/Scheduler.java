@@ -82,19 +82,30 @@ public class Scheduler implements Runnable {
 	    			switch(message.getSender()) {
 						case ELEVATOR:						
 							StateMessage elevPos = (StateMessage) Data.fromByteArray(receivePacket.getData());
+							Message floorRequest = null;
 							if(elevators.add(receivePacket)) {//adding to list of elevators
-								done  = new OkMessage("Cool");
-								elevators.print();
-								System.out.println("Debug Elevator size : " + elevators.size());
-								sendToSystem(done, Systems.ELEVATOR, receivePacket.getAddress(), 
-										receivePacket.getPort());
+								currState = SchedulerState.ADD_ELEVATOR;
 							}
 							else { // Elevator already connected/ in list
 								//give task
 								if(!floorPackets.isEmpty() && (elevPos.getState() == ElevatorStates.STATIONARY ||
 										elevPos.getState() == ElevatorStates.MOVING )) {
+									floorRequest = (Message) Data.fromByteArray(floorPackets.peek().getData());
+									currState = SchedulerState.SET_PROB;
+								}
+								else {// no data/request to send
+									currState = SchedulerState.SEND_OK;
+								}								
+							}
+							switch(currState) {
+								case ADD_ELEVATOR:
+									done  = new OkMessage("Cool");
+									elevators.print();
+									sendToSystem(done, Systems.ELEVATOR, receivePacket.getAddress(), 
+											receivePacket.getPort());
+									break;
+								case SET_PROB:
 									System.out.println(Data.fromByteArray(floorPackets.peek().getData()));
-									Message floorRequest = (Message) Data.fromByteArray(floorPackets.peek().getData());
 									//add probaility to elevator for the current data until
 									//probaility added to all elevators
 									double tempProb = getProb(elevPos, floorRequest);
@@ -122,12 +133,13 @@ public class Scheduler implements Runnable {
 										System.out.print("Elevators prob set to Default: ");
 										elevators.print();
 									}
-								}
-								else {// no data/request to send
+									break;
+								case SEND_OK:
 									done  = new OkMessage("Cool");
 									sendToSystem(done, Systems.ELEVATOR, receivePacket.getAddress(), 
 											receivePacket.getPort());
-								}								
+									break;
+									
 							}
 							break;
 						case FLOOR:
