@@ -14,6 +14,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.net.SocketException;
@@ -38,13 +39,16 @@ public class Elevator implements Runnable {
     private int floor;
     private String dir;
     private boolean passenger;
+	public ArrayList<StateMessage> outputs;
+	private int id;
     
 
     /**
      * Elevator Class Constructor
      * 
      */
-    public Elevator() {
+    public Elevator(int id) {
+    	this.id = id;
     	passenger = false;
     	currState = ElevatorStates.STATIONARY;
     	lamp = -1;
@@ -93,11 +97,11 @@ public class Elevator implements Runnable {
 	    				currState = ElevatorStates.STATIONARY;
 	    			}
 	    			else {//has requests
-	    				if(currFloor != floor) {
+	    				if(currFloor != floor) {  //Not in floor to pick up passenger
 	    					currState = ElevatorStates.MOVING;
 	    				}
 	    				else {
-	    					//Open door
+	    					//Open door as currently in floor to pick up massenger
 	    					currState = ElevatorStates.OPENDOOR;            					
 	    					passenger = true;
 	    				}
@@ -109,7 +113,6 @@ public class Elevator implements Runnable {
 	    			//MOVE or STATIONARY
 	    			if(lamp == -1) {//passenger served
 	    				requests.poll();//remove message
-	    				System.out.println(requests.isEmpty());
 	    				passenger = false;
 	    				currState = ElevatorStates.STATIONARY;
 	    			}
@@ -121,7 +124,7 @@ public class Elevator implements Runnable {
 	    		case MOVING:
 	    			Thread.sleep(Timing.MOVE.getTime()*1000);
 	    			//Keep Moving till floor reached
-	    			if(!passenger) {
+	    			if(!passenger) { //empty elevator
 	    				if(currFloor != floor) {
 	    					if(currFloor < floor) {//pickup floor above
 	    						currFloor++;
@@ -135,7 +138,7 @@ public class Elevator implements Runnable {
 	    					currState = ElevatorStates.OPENDOOR;
 	    				}
 	    			}
-	    			else {
+	    			else { //has passenger
 	    				if(lamp != -1) {
 	    					if(dir.equals("Up")) {//requested to go up
 	    						currFloor++;
@@ -145,6 +148,7 @@ public class Elevator implements Runnable {
 	    					}
 	    					
 	    					if(currFloor == lamp) {
+	    						currState = ElevatorStates.OPENDOOR;
 	    						lamp = -1;
 	    					}
 	    				}
@@ -164,15 +168,15 @@ public class Elevator implements Runnable {
 	    			break;
 	    	}
             //send state to scheduler
-            messageToSend = new StateMessage(currState, currFloor);
+            messageToSend = new StateMessage(id, currState, currFloor, lamp);
             sendToSystem(messageToSend, Systems.SCHEDULER);
-            System.out.println("ELEVATOR: Packet sent.");
+            System.out.println("ELEVATOR: " + id +  " Packet sent.");
 		    
 		    
 		    //receive message from scheduler
             byte[] bufReceived = new byte[1024];
             receivePacket = new DatagramPacket(bufReceived, bufReceived.length);
-            System.out.println("ELEVATOR: Waiting for packet...\n");
+            System.out.println("ELEVATOR: " + id +  " Waiting for packet...\n");
             socket.receive(receivePacket);
             
             try {
@@ -181,17 +185,17 @@ public class Elevator implements Runnable {
                 ce.printStackTrace();
             }
             
-            System.out.println("ELEVATOR: Packet received from: "+ receivedMessage.getSender());
-            System.out.println("ELEVATOR: From host address: " + receivePacket.getAddress());
-            System.out.println("ELEVATOR: From host port : " + receivePacket.getPort());
+            System.out.println("ELEVATOR: " + id +  " Packet received from: "+ receivedMessage.getSender());
+            System.out.println("ELEVATOR: " + id +  " From host address: " + receivePacket.getAddress());
+            System.out.println("ELEVATOR: " + id +  " From host port : " + receivePacket.getPort());
             //check data type
             //if type Request, add to queue
             if(receivedMessage.getType() == MessageType.REQUEST) {
             	requests.add((Message) receivedMessage);
-            	System.out.println("ELEVATOR: Packet data: " + ((Message)receivedMessage) + "\n");
+            	System.out.println("ELEVATOR: " + id +  " Packet data: " + ((Message)receivedMessage) + "\n");
             }
             else {
-            	System.out.println("ELEVATOR: Packet data: " + ((OkMessage)receivedMessage) + "\n");
+            	System.out.println("ELEVATOR: " + id +  " Packet data: " + ((OkMessage)receivedMessage) + "\n");
             }
         }
 //        System.out.println("Closing Elevator socket\n");
@@ -212,7 +216,7 @@ public class Elevator implements Runnable {
     }
 
     public static void main(String args[]) throws IOException, ClassNotFoundException, InterruptedException {
-        Elevator c = new Elevator();
+        Elevator c = new Elevator(1);
         c.start();
     }
 
