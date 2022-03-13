@@ -24,13 +24,6 @@ public class ElevatorList {
 	 */
 	public boolean add(DatagramPacket packet) {
 		for(int i = 0; i < list.size(); i++) {
-//			System.out.println("Checking addition of elevators");
-//			System.out.println("List port: "+ list.get(i).port);
-//			System.out.println("Param port: "+ packet.getPort());
-//			System.out.println(list.get(i).port == packet.getPort());
-//			System.out.println("List Address: "+ list.get(i).address);
-//			System.out.println("Param Address: "+ packet.getAddress());
-//			System.out.println(list.get(i).address.equals(packet.getAddress()));
 			if(list.get(i).port == packet.getPort() && list.get(i).address.equals(packet.getAddress())) {
 				return false;
 			}
