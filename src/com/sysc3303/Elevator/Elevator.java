@@ -55,6 +55,7 @@ public class Elevator implements Runnable {
     	currState = ElevatorStates.STATIONARY;
     	lamp = -1;
     	currFloor = 0;
+    	floor = 0;
         try {
             // Construct a datagram socket and bind it to any available port on the local host machine. 
         	//This socket will be used to send and receive UDP Datagram packets.
@@ -100,7 +101,7 @@ public class Elevator implements Runnable {
 	    			}
 	    			else {//has requests
 	    				if(currFloor != floor) {  //Not in floor to pick up passenger
-	    					currState = ElevatorStates.MOVING;
+	    					currState = ElevatorStates.STARTING;
 	    				}
 	    				else {
 	    					//Open door as currently in floor to pick up massenger
@@ -119,7 +120,8 @@ public class Elevator implements Runnable {
 	    				currState = ElevatorStates.STATIONARY;
 	    			}
 	    			else {
-	    				currState = ElevatorStates.MOVING;
+	    				System.out.println("Startingggggggg" + id);
+	    				currState = ElevatorStates.STARTING;
 	    			}
 	    			//send to scheduler
 	    			break;
@@ -168,9 +170,13 @@ public class Elevator implements Runnable {
 	    			currState = ElevatorStates.CLOSEDOOR;
 	    			//send to scheduler
 	    			break;
+	    		case STARTING:
+	    			currState = ElevatorStates.MOVING;
+	    			break;
+	    			
 	    	}
             //send state to scheduler
-            messageToSend = new StateMessage(id, currState, currFloor, lamp);
+            messageToSend = new StateMessage(id, currState, currFloor, passenger? lamp: floor);
             sendToSystem(messageToSend, Systems.SCHEDULER);
             System.out.println("ELEVATOR: " + id +  " Packet sent.");
 		    
@@ -196,12 +202,16 @@ public class Elevator implements Runnable {
             	requests.add((Message) receivedMessage);
             	System.out.println("ELEVATOR: " + id +  " Packet data: " + ((Message)receivedMessage) + "\n");
             }
+            else if (receivedMessage.getType() == MessageType.BROKEN) {
+            	System.out.println("ELEVATOR: " + id + " is Broken. Closing connection.");
+            	break;
+            }
             else {
             	System.out.println("ELEVATOR: " + id +  " Packet data: " + ((OkMessage)receivedMessage) + "\n");
             }
         }
-//        System.out.println("Closing Elevator socket\n");
-//        socket.close();
+        System.out.println("Closing Elevator socket\n");
+        socket.close();
     }
     
     /**

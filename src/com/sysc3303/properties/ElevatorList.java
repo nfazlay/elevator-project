@@ -81,6 +81,34 @@ public class ElevatorList {
 		return list.get(i);
 	}
 	
+	public void startTimer(DatagramPacket packet, long time) {
+		for(int i = 0; i < list.size(); i++) {
+			if(list.get(i).port == packet.getPort() && list.get(i).address.equals(packet.getAddress())) {
+				list.get(i).startTimer(time);
+			}
+		}
+	}
+	
+	public boolean checkTimer(DatagramPacket packet) {
+		for(int i = 0; i < list.size(); i++) {
+			if(list.get(i).port == packet.getPort() && list.get(i).address.equals(packet.getAddress())) {
+				return list.get(i).checkTimer();
+			}
+		}
+		System.out.println(false);
+		return false;
+	}
+	
+	public ElevatorData remove(DatagramPacket packet) {
+		for(int i = 0; i < list.size(); i++) {
+			if(list.get(i).port == packet.getPort() && list.get(i).address.equals(packet.getAddress())) {
+				this.size--;
+				return list.remove(i);
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Size of list
 	 * @return
