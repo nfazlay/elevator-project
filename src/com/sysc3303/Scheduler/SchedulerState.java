@@ -17,5 +17,9 @@ public enum SchedulerState {
 	/**
 	 * Send OK Response to Elevator
 	 */
-	SEND_OK;
+	SEND_OK,
+	/**
+	 * Send Broken
+	 */
+	SEND_BROKEN;
 }

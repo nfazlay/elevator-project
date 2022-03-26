@@ -3,11 +3,13 @@ package com.sysc3303.Scheduler;
 import java.io.*;
 
 
+
 import java.net.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import com.sysc3303.Elevator.ElevatorStates;
+import com.sysc3303.properties.BrokenMessage;
 import com.sysc3303.properties.Data;
 import com.sysc3303.properties.ElevatorData;
 import com.sysc3303.properties.ElevatorList;
@@ -16,6 +18,7 @@ import com.sysc3303.properties.StateMessage;
 import com.sysc3303.properties.Message;
 import com.sysc3303.properties.OkMessage;
 import com.sysc3303.properties.Systems;
+import com.sysc3303.properties.Timing;
  
 /**
  * Scheduler Class that implements the runnable
@@ -28,6 +31,7 @@ public class Scheduler implements Runnable {
     protected Data message, done;
     private Queue<DatagramPacket> floorPackets = new LinkedList<DatagramPacket>();
     private ElevatorList elevators;
+    private ElevatorList brokenElevators;
     private SchedulerState currState; 
     
     /**
@@ -39,6 +43,7 @@ public class Scheduler implements Runnable {
      */
     public Scheduler(int port) throws SocketException, UnknownHostException {
     	elevators = new ElevatorList();
+    	brokenElevators = new ElevatorList();
         socket = new DatagramSocket(port);
         socket.setSoTimeout(10*1000);//10 seconds
     }
@@ -93,9 +98,21 @@ public class Scheduler implements Runnable {
 									floorRequest = (Message) Data.fromByteArray(floorPackets.peek().getData());
 									currState = SchedulerState.SET_PROB;
 								}
+								else if (elevPos.getState() == ElevatorStates.STARTING) {
+									elevators.startTimer(receivePacket , getTime(elevPos));
+									currState = SchedulerState.SEND_OK;
+								}
+								else if (elevPos.getState() == ElevatorStates.MOVING) {
+									if(!elevators.checkTimer(receivePacket)) {
+										currState = SchedulerState.SEND_BROKEN;
+									}
+									else {
+										currState = SchedulerState.SEND_OK;
+									}
+								}
 								else {// no data/request to send
 									currState = SchedulerState.SEND_OK;
-								}								
+								}
 							}
 							switch(currState) {
 								case ADD_ELEVATOR:
@@ -106,16 +123,28 @@ public class Scheduler implements Runnable {
 									break;
 								case SET_PROB:
 									System.out.println(Data.fromByteArray(floorPackets.peek().getData()));
-									//add probaility to elevator for the current data until
-									//probaility added to all elevators
-									double tempProb = getProb(elevPos, floorRequest);
-									elevators.setProbElev(tempProb, receivePacket.getPort(), 
-											receivePacket.getAddress());//set the porbability for the specific elevator
+									double tempProb;
+									if(elevPos.getState()== ElevatorStates.MOVING && !elevators.checkTimer(receivePacket)) {
+										elevators.remove(receivePacket);
+										brokenElevators.add(receivePacket);
+										System.out.println("SCHEDULER: BROKEN ELEVATOR!!! STOPPED FOR SERVICE");
+										Data brokenMsg = new BrokenMessage("Broken");
+										sendToSystem(brokenMsg, Systems.ELEVATOR, receivePacket.getAddress(),
+												receivePacket.getPort());
+									}
+									else {
+										//add probaility to elevator for the current data until
+										//probaility added to all elevators
+										tempProb = getProb(elevPos, floorRequest);
+										elevators.setProbElev(tempProb, receivePacket.getPort(), 
+												receivePacket.getAddress());//set the porbability for the specific elevator								
+									}
 									elevators.print();
 									if(elevators.serveCheck()) {//probability for all elevators added wrt current data
 										//send data to elevator that has highest prob and remove from queue
 										System.out.println("SCHEDULER: IN SERVERCHECK");
-										ElevatorData elev = elevators.getHighProbElev();								
+										ElevatorData elev = elevators.getHighProbElev();
+										//long time = getTime();
 										sendToSystem(floorRequest, Systems.ELEVATOR,  elev.address, elev.port);
 										floorPackets.remove();
 										
@@ -139,7 +168,13 @@ public class Scheduler implements Runnable {
 									sendToSystem(done, Systems.ELEVATOR, receivePacket.getAddress(), 
 											receivePacket.getPort());
 									break;
-									
+								case SEND_BROKEN:
+									elevators.remove(receivePacket);
+									brokenElevators.add(receivePacket);
+									System.out.println("SCHEDULER: BROKEN ELEVATOR!!! STOPPED FOR SERVICE");
+									Data brokenMsg = new BrokenMessage("Broken");
+									sendToSystem(brokenMsg, Systems.ELEVATOR, receivePacket.getAddress(),
+											receivePacket.getPort());
 							}
 							break;
 						case FLOOR:
@@ -221,6 +256,11 @@ public class Scheduler implements Runnable {
 				break;
 		}
 		return prob;
+    }
+    
+    public long getTime(StateMessage elevPos) {
+    	long time = (long) Math.abs(elevPos.getFloor() - elevPos.getDest())*Timing.MOVE.getTime() ;
+    	return time;
     }
     
     @Override
