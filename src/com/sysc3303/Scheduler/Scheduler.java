@@ -5,6 +5,7 @@ import java.io.*;
 
 
 import java.net.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -31,8 +32,9 @@ public class Scheduler implements Runnable {
     protected Data message, done;
     private Queue<DatagramPacket> floorPackets = new LinkedList<DatagramPacket>();
     private ElevatorList elevators;
-    private ElevatorList brokenElevators;
+    public ElevatorList brokenElevators;
     private SchedulerState currState; 
+    public ArrayList<Systems> broken;
     
     /**
      * Constructor for Scheduler server
@@ -131,6 +133,7 @@ public class Scheduler implements Runnable {
 										Data brokenMsg = new BrokenMessage("Broken");
 										sendToSystem(brokenMsg, Systems.ELEVATOR, receivePacket.getAddress(),
 												receivePacket.getPort());
+										broken.add(Systems.ELEVATOR);
 									}
 									else {
 										//add probaility to elevator for the current data until
@@ -175,6 +178,7 @@ public class Scheduler implements Runnable {
 									Data brokenMsg = new BrokenMessage("Broken");
 									sendToSystem(brokenMsg, Systems.ELEVATOR, receivePacket.getAddress(),
 											receivePacket.getPort());
+									broken.add(Systems.ELEVATOR);
 							}
 							break;
 						case FLOOR:
