@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.sysc3303"},{"l":"com.sysc3303.Elevator"},{"l":"com.sysc3303.properties"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.sysc3303"}];updateSearchResults();

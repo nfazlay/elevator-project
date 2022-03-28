@@ -16,5 +16,9 @@ public enum MessageType {
 	/**
 	 * Data Type State
 	 */
-	STATE
+	STATE,
+	/**
+	 * Data type Broken
+	 */
+	BROKEN
 }

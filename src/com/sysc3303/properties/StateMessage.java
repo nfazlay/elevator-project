@@ -11,8 +11,10 @@ import com.sysc3303.Elevator.ElevatorStates;
 public class StateMessage extends Data implements Serializable {
 	   private static final long serialVersionUID = 1L;
        
+	   private int id;
 	   private ElevatorStates state;
 	   private int currFloor;
+	   private int currDest;
 	   private MessageType type = null;
 	   private Systems sender;
 	   private Systems receiver;
@@ -21,10 +23,12 @@ public class StateMessage extends Data implements Serializable {
     * Constructor of the StateMessage class
     */
        
-   public StateMessage(ElevatorStates state, int currFloor) {
+   public StateMessage(int id, ElevatorStates state, int currFloor, int currDest) {
+	   this.id = id;
 	   this.type = MessageType.STATE;
 	   this.state = state;
 	   this.currFloor = currFloor;
+	   this.currDest = currDest;
    }
    /**
     * Get the state.
@@ -39,6 +43,22 @@ public class StateMessage extends Data implements Serializable {
     */
    public int getFloor() {
 	   return currFloor;
+   }  
+   
+   /**
+    * Get ID of elevator
+    * @return int currfloor
+    */
+   public int getId() {
+	   return id;
+   }  
+   
+   /**
+    * Get destination floor
+    * @return int currDest
+    */
+   public int getDest() {
+	   return currDest;
    }
    
   	/**
@@ -89,7 +109,7 @@ public class StateMessage extends Data implements Serializable {
     */
    @Override
    public String toString() { 
-	   return "Current State: " + state.getState() + " || Current Floor: " + currFloor; 
+	   return "Elevator ID: " + id + " Current State: " + state.getState() + " || Current Floor: " + currFloor; 
    }
    
 }

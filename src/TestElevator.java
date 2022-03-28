@@ -9,9 +9,9 @@ import java.util.Scanner;
 import org.junit.Assert;
 import org.junit.Test;
 import com.sysc3303.Floor;
-import com.sysc3303.Scheduler;
 import com.sysc3303.Elevator.Elevator;
 import com.sysc3303.Elevator.ElevatorStates;
+import com.sysc3303.Scheduler.Scheduler;
 import com.sysc3303.properties.StateMessage;
 /**
 *
@@ -23,21 +23,24 @@ import com.sysc3303.properties.StateMessage;
 public class TestElevator {
 	//Two array list to keep track of elevator's states and floors.
 	public static ArrayList<StateMessage> log = new ArrayList<StateMessage>();
+	public static ArrayList<StateMessage> log2 = new ArrayList<StateMessage>();
 	private static ArrayList<Integer> floors = new ArrayList<Integer>();
+	private static ArrayList<Integer> floors2 = new ArrayList<Integer>();
 	
 	private Scanner sc;
 	//Two boolean indicator of which element's door is properly closed or not.
 	private boolean openClosedFloor;
 	private boolean openClosedCar;
+	ArrayList<Integer> inputFloors = new ArrayList<Integer>();
 	
 	@Test
 	public void test() throws SocketException, UnknownHostException {
 		System.out.println(String.format("----- Testing Elevator System -----"));
 		
 		final Scheduler server = new Scheduler(8080);
-		final Elevator elevator = new Elevator();
+		final Elevator elevator = new Elevator(1);
 		final Floor floor = new Floor();
-		
+		final Elevator elevator2 = new Elevator(2);
 		//The two boolean indicator initially set to true.
 		openClosedFloor = true;
 		openClosedCar = true;
@@ -46,22 +49,28 @@ public class TestElevator {
 		new Thread(server).start();
 		new Thread(elevator).start();
 		new Thread(floor).start();
+		new Thread(elevator2).start();
 		
 		//Only read the logs from the elevator after certain time interval, it's to make sure that 
 		//the logs have enough data to analyze, if extra instruction applied, more time should be added too.
 		try {
-			Thread.sleep(120000);
+			Thread.sleep(50000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
 		//Register the logs from the elevator, and extract the data of floor and State form it.
 		log = elevator.outputs;
-		System.out.println(log);
+		log2 = elevator2.outputs;
 		
 		for(int i = 0; i < log.size(); i++) {
 			floors.add(log.get(i).getFloor());
 		}
+		
+		for(int i = 0; i < log2.size(); i++) {
+			floors2.add(log2.get(i).getFloor());
+		}
+		
 		
 		//Testing the actual log of the elevator with the initial instruction in the input.txt file.
 		String filePath = "input.txt";
@@ -74,7 +83,7 @@ public class TestElevator {
 		
 		//Testing through each line of command in the input file.
         while (sc.hasNextLine()) {
-        	ArrayList<Integer> inputFloors = new ArrayList<Integer>();
+        	
         	// Parses data into string array
             String line = sc.nextLine();
             String[] tempData = line.split(" ");
@@ -91,11 +100,21 @@ public class TestElevator {
             inputFloors.add(floorInt);
             //Using the while loop to fill the passed floor with only one move state each.
             int j = 1;
-            while(difference > 1) {
-            	
-            	inputFloors.add(floorInt + j);
-            	difference--;
-            	j++;
+            if(difference > 0) {
+	            while(difference > 1) {
+	            	inputFloors.add(floorInt + j);
+	            	difference--;
+	            	j++;
+	            }
+            }
+            if(difference < 0) {
+	            while(difference < 0) {
+	            	inputFloors.add(floorInt - j);
+	            	difference++;
+	            	j++;
+	            }
+	            
+	        
             }
             //At the destination floor, it only takes two states: open and close door.            
             inputFloors.add(Integer.valueOf(carButton));
@@ -124,12 +143,21 @@ public class TestElevator {
     			        }
     		         }
     			}
+    	    System.out.println(inputFloors);
+    	    System.out.println(floors);
+    	    System.out.println(floors2);
+    	    
+    	    
             
-            Assert.assertTrue(openClosedFloor);
-            Assert.assertTrue(openClosedCar);
-            //Use collection method to check if the floors' data is following the same sequence as it suppose to.
-            Assert.assertTrue((Collections.indexOfSubList(floors, inputFloors)>= 0));
             }  
         }
+        Assert.assertTrue(openClosedFloor);
+        Assert.assertTrue(openClosedCar);
+        //Use collection method to check if the floors' data is following the same sequence as it suppose to.
+        Assert.assertTrue((Collections.indexOfSubList(floors, inputFloors)>= 0));
+        Assert.assertTrue((Collections.indexOfSubList(floors2, inputFloors)>= 0));
     }
+	
+	
+	
 }

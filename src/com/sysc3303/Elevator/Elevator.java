@@ -1,6 +1,7 @@
 package com.sysc3303.Elevator;
 
 import com.sysc3303.properties.Message;
+
 import com.sysc3303.properties.MessageType;
 import com.sysc3303.properties.OkMessage;
 import com.sysc3303.properties.StateMessage;
@@ -14,9 +15,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.net.SocketException;
+import java.util.Random;
 
 /**
  * Elevator Class that implements the runnable interface
@@ -38,17 +41,21 @@ public class Elevator implements Runnable {
     private int floor;
     private String dir;
     private boolean passenger;
+	public ArrayList<StateMessage> outputs;
+	private int id;
     
 
     /**
      * Elevator Class Constructor
      * 
      */
-    public Elevator() {
+    public Elevator(int id) {
+    	this.id = id;
     	passenger = false;
     	currState = ElevatorStates.STATIONARY;
     	lamp = -1;
     	currFloor = 0;
+    	floor = 0;
         try {
             // Construct a datagram socket and bind it to any available port on the local host machine. 
         	//This socket will be used to send and receive UDP Datagram packets.
@@ -93,11 +100,11 @@ public class Elevator implements Runnable {
 	    				currState = ElevatorStates.STATIONARY;
 	    			}
 	    			else {//has requests
-	    				if(currFloor != floor) {
-	    					currState = ElevatorStates.MOVING;
+	    				if(currFloor != floor) {  //Not in floor to pick up passenger
+	    					currState = ElevatorStates.STARTING;
 	    				}
 	    				else {
-	    					//Open door
+	    					//Open door as currently in floor to pick up massenger
 	    					currState = ElevatorStates.OPENDOOR;            					
 	    					passenger = true;
 	    				}
@@ -109,19 +116,19 @@ public class Elevator implements Runnable {
 	    			//MOVE or STATIONARY
 	    			if(lamp == -1) {//passenger served
 	    				requests.poll();//remove message
-	    				System.out.println(requests.isEmpty());
 	    				passenger = false;
 	    				currState = ElevatorStates.STATIONARY;
 	    			}
 	    			else {
-	    				currState = ElevatorStates.MOVING;
+	    				System.out.println("Startingggggggg" + id);
+	    				currState = ElevatorStates.STARTING;
 	    			}
 	    			//send to scheduler
 	    			break;
 	    		case MOVING:
 	    			Thread.sleep(Timing.MOVE.getTime()*1000);
 	    			//Keep Moving till floor reached
-	    			if(!passenger) {
+	    			if(!passenger) { //empty elevator
 	    				if(currFloor != floor) {
 	    					if(currFloor < floor) {//pickup floor above
 	    						currFloor++;
@@ -135,7 +142,7 @@ public class Elevator implements Runnable {
 	    					currState = ElevatorStates.OPENDOOR;
 	    				}
 	    			}
-	    			else {
+	    			else { //has passenger
 	    				if(lamp != -1) {
 	    					if(dir.equals("Up")) {//requested to go up
 	    						currFloor++;
@@ -145,6 +152,7 @@ public class Elevator implements Runnable {
 	    					}
 	    					
 	    					if(currFloor == lamp) {
+	    						currState = ElevatorStates.OPENDOOR;
 	    						lamp = -1;
 	    					}
 	    				}
@@ -162,17 +170,21 @@ public class Elevator implements Runnable {
 	    			currState = ElevatorStates.CLOSEDOOR;
 	    			//send to scheduler
 	    			break;
+	    		case STARTING:
+	    			currState = ElevatorStates.MOVING;
+	    			break;
+	    			
 	    	}
             //send state to scheduler
-            messageToSend = new StateMessage(currState, currFloor);
+            messageToSend = new StateMessage(id, currState, currFloor, passenger? lamp: floor);
             sendToSystem(messageToSend, Systems.SCHEDULER);
-            System.out.println("ELEVATOR: Packet sent.");
+            System.out.println("ELEVATOR: " + id +  " Packet sent.");
 		    
 		    
 		    //receive message from scheduler
             byte[] bufReceived = new byte[1024];
             receivePacket = new DatagramPacket(bufReceived, bufReceived.length);
-            System.out.println("ELEVATOR: Waiting for packet...\n");
+            System.out.println("ELEVATOR: " + id +  " Waiting for packet...\n");
             socket.receive(receivePacket);
             
             try {
@@ -181,21 +193,25 @@ public class Elevator implements Runnable {
                 ce.printStackTrace();
             }
             
-            System.out.println("ELEVATOR: Packet received from: "+ receivedMessage.getSender());
-            System.out.println("ELEVATOR: From host address: " + receivePacket.getAddress());
-            System.out.println("ELEVATOR: From host port : " + receivePacket.getPort());
+            System.out.println("ELEVATOR: " + id +  " Packet received from: "+ receivedMessage.getSender());
+            System.out.println("ELEVATOR: " + id +  " From host address: " + receivePacket.getAddress());
+            System.out.println("ELEVATOR: " + id +  " From host port : " + receivePacket.getPort());
             //check data type
             //if type Request, add to queue
             if(receivedMessage.getType() == MessageType.REQUEST) {
             	requests.add((Message) receivedMessage);
-            	System.out.println("ELEVATOR: Packet data: " + ((Message)receivedMessage) + "\n");
+            	System.out.println("ELEVATOR: " + id +  " Packet data: " + ((Message)receivedMessage) + "\n");
+            }
+            else if (receivedMessage.getType() == MessageType.BROKEN) {
+            	System.out.println("ELEVATOR: " + id + " is Broken. Closing connection.");
+            	break;
             }
             else {
-            	System.out.println("ELEVATOR: Packet data: " + ((OkMessage)receivedMessage) + "\n");
+            	System.out.println("ELEVATOR: " + id +  " Packet data: " + ((OkMessage)receivedMessage) + "\n");
             }
         }
-//        System.out.println("Closing Elevator socket\n");
-//        socket.close();
+        System.out.println("Closing Elevator socket\n");
+        socket.close();
     }
     
     /**
@@ -212,7 +228,9 @@ public class Elevator implements Runnable {
     }
 
     public static void main(String args[]) throws IOException, ClassNotFoundException, InterruptedException {
-        Elevator c = new Elevator();
+    	Random rand = new Random();
+    	int id = rand.nextInt(100);
+        Elevator c = new Elevator(id);
         c.start();
     }
 

@@ -14,6 +14,10 @@ public enum ElevatorStates {
      */
     MOVING("Moving", (byte)2),
     /**
+     * Elevator starting to serve
+     */
+    STARTING("Starting", (byte)5),
+    /**
      * Elevator Open Door
      */
     OPENDOOR("Opening door", (byte)3),
