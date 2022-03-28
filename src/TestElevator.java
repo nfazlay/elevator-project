@@ -5,6 +5,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Scanner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,7 +13,10 @@ import com.sysc3303.Floor;
 import com.sysc3303.Elevator.Elevator;
 import com.sysc3303.Elevator.ElevatorStates;
 import com.sysc3303.Scheduler.Scheduler;
+import com.sysc3303.properties.Data;
+import com.sysc3303.properties.ElevatorList;
 import com.sysc3303.properties.StateMessage;
+import com.sysc3303.properties.Systems;
 /**
 *
 * The TestElevator class creates the program to run all threads of the elevator and then check the logs
@@ -32,9 +36,13 @@ public class TestElevator {
 	private boolean openClosedFloor;
 	private boolean openClosedCar;
 	ArrayList<Integer> inputFloors = new ArrayList<Integer>();
+	private Data message;
 	
-	@Test
-	public void test() throws SocketException, UnknownHostException {
+	//Test for past iterations to test walked floors of elevator.
+	/**
+	 * @Test
+	public void test1() throws SocketException, UnknownHostException {
+	 
 		System.out.println(String.format("----- Testing Elevator System -----"));
 		
 		final Scheduler server = new Scheduler(8080);
@@ -157,7 +165,44 @@ public class TestElevator {
         Assert.assertTrue((Collections.indexOfSubList(floors, inputFloors)>= 0));
         Assert.assertTrue((Collections.indexOfSubList(floors2, inputFloors)>= 0));
     }
+	*/
 	
+	//Test to check if elevators stopped for detected broken messages.
+	@Test
+	public void test2() throws SocketException, UnknownHostException {
+    System.out.println(String.format("----- Testing Elevator System -----"));
+		
+		final Scheduler server = new Scheduler(8080);
+		final Elevator elevator = new Elevator(1);
+		final Floor floor = new Floor();
+		final Elevator elevator2 = new Elevator(2);
+		
+		//Start three threads.
+		new Thread(server).start();
+		new Thread(elevator).start();
+		new Thread(floor).start();
+		new Thread(elevator2).start();
+		
+		//Initialize the counter for broken elevators.
+		int broken = 0;
+		//The list of broken elevators from scheduler side
+		ElevatorList brokenList = server.brokenElevators;
+		
+		//Only read the logs from the elevator after certain time interval, it's to make sure that 
+		//the logs have enough data to analyze, if extra instruction applied, more time should be added too.
+		try {
+			Thread.sleep(30000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		//compare the number of broken elevators with scheduler.
+		broken += elevator.broken;
+		broken += elevator2.broken;
+		Assert.assertEquals(broken, brokenList.size());			
+			
+		
+	}
 	
 	
 }
