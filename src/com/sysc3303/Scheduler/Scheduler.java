@@ -259,7 +259,8 @@ public class Scheduler implements Runnable {
     }
     
     public long getTime(StateMessage elevPos) {
-    	long time = (long) Math.abs(elevPos.getFloor() - elevPos.getDest())*Timing.MOVE.getTime() ;
+    	long time = (long) Math.abs(elevPos.getFloor() + elevPos.getDest())*(Timing.MOVE.getTime()*2) + 
+    			Timing.OPENDOOR.getTime() + Timing.CLOSEDOOR.getTime() + (elevPos.getFloor() + elevPos.getDest());
     	return time;
     }
     

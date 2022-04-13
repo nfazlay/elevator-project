@@ -120,7 +120,7 @@ public class Elevator implements Runnable {
 	    				currState = ElevatorStates.STATIONARY;
 	    			}
 	    			else {
-	    				System.out.println("Startingggggggg" + id);
+	    				// System.out.println("Startingggggggg" + id);
 	    				currState = ElevatorStates.STARTING;
 	    			}
 	    			//send to scheduler
