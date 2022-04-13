@@ -28,19 +28,21 @@ public class TestElevator {
 	//Two array list to keep track of elevator's states and floors.
 	public static ArrayList<StateMessage> log = new ArrayList<StateMessage>();
 	public static ArrayList<StateMessage> log2 = new ArrayList<StateMessage>();
+	public static ArrayList<StateMessage> log3 = new ArrayList<StateMessage>();
+	public static ArrayList<StateMessage> log4 = new ArrayList<StateMessage>();
 	private static ArrayList<Integer> floors = new ArrayList<Integer>();
 	private static ArrayList<Integer> floors2 = new ArrayList<Integer>();
+	private static ArrayList<Integer> floors3 = new ArrayList<Integer>();
+	private static ArrayList<Integer> floors4 = new ArrayList<Integer>();
 	
 	private Scanner sc;
 	//Two boolean indicator of which element's door is properly closed or not.
 	private boolean openClosedFloor;
 	private boolean openClosedCar;
 	ArrayList<Integer> inputFloors = new ArrayList<Integer>();
-	private Data message;
 	
 	//Test for past iterations to test walked floors of elevator.
-	/**
-	 * @Test
+	@Test
 	public void test1() throws SocketException, UnknownHostException {
 	 
 		System.out.println(String.format("----- Testing Elevator System -----"));
@@ -49,27 +51,33 @@ public class TestElevator {
 		final Elevator elevator = new Elevator(1);
 		final Floor floor = new Floor();
 		final Elevator elevator2 = new Elevator(2);
+		final Elevator elevator3 = new Elevator(3);
+		final Elevator elevator4 = new Elevator(4);
 		//The two boolean indicator initially set to true.
 		openClosedFloor = true;
 		openClosedCar = true;
 		
-		//Start three threads.
+		//Start the threads.
 		new Thread(server).start();
 		new Thread(elevator).start();
-		new Thread(floor).start();
 		new Thread(elevator2).start();
+		new Thread(elevator3).start();
+		new Thread(elevator4).start();
+		new Thread(floor).start();
 		
 		//Only read the logs from the elevator after certain time interval, it's to make sure that 
 		//the logs have enough data to analyze, if extra instruction applied, more time should be added too.
 		try {
-			Thread.sleep(50000);
+			Thread.sleep(400000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
-		//Register the logs from the elevator, and extract the data of floor and State form it.
+		//Register the logs from the elevators, and extract the data of floor and State form it.
 		log = elevator.outputs;
 		log2 = elevator2.outputs;
+		log3 = elevator3.outputs;
+		log4 = elevator4.outputs;
 		
 		for(int i = 0; i < log.size(); i++) {
 			floors.add(log.get(i).getFloor());
@@ -77,6 +85,14 @@ public class TestElevator {
 		
 		for(int i = 0; i < log2.size(); i++) {
 			floors2.add(log2.get(i).getFloor());
+		}
+		
+		for(int i = 0; i < log3.size(); i++) {
+			floors3.add(log3.get(i).getFloor());
+		}
+		
+		for(int i = 0; i < log4.size(); i++) {
+			floors4.add(log4.get(i).getFloor());
 		}
 		
 		
@@ -88,12 +104,14 @@ public class TestElevator {
             fe.printStackTrace();
         }
 		
-		
+		for(int i = 0; i < 50; i++) {
+			inputFloors.add(0);
+		}
 		//Testing through each line of command in the input file.
         while (sc.hasNextLine()) {
         	
         	// Parses data into string array
-            String line = sc.nextLine();
+        	String line = sc.nextLine();
             String[] tempData = line.split(" ");
 
             int floorInt = Integer.parseInt(tempData[1]);
@@ -106,6 +124,8 @@ public class TestElevator {
             inputFloors.add(floorInt);
             inputFloors.add(floorInt);
             inputFloors.add(floorInt);
+            
+    		
             //Using the while loop to fill the passed floor with only one move state each.
             int j = 1;
             if(difference > 0) {
@@ -127,6 +147,7 @@ public class TestElevator {
             //At the destination floor, it only takes two states: open and close door.            
             inputFloors.add(Integer.valueOf(carButton));
             inputFloors.add(Integer.valueOf(carButton));
+            
             
             
             for(int i = 0; i < log.size(); i++) {
@@ -151,37 +172,26 @@ public class TestElevator {
     			        }
     		         }
     			}
-    	    System.out.println(inputFloors);
+            }
+    			
+    		
+    			
+    	    System.out.println("input"+inputFloors);
     	    System.out.println(floors);
     	    System.out.println(floors2);
-    	    
-    	    
-            
-            }  
+    	    System.out.println(floors3);
+    	    System.out.println(floors4);
+    	      
         }
+        
+        
         Assert.assertTrue(openClosedFloor);
         Assert.assertTrue(openClosedCar);
-        //Use collection method to check if the floors' data is following the same sequence as it suppose to.
-        Assert.assertTrue((Collections.indexOfSubList(floors, inputFloors)>= 0));
-        Assert.assertTrue((Collections.indexOfSubList(floors2, inputFloors)>= 0));
-    }
-	*/
-	
-	//Test to check if elevators stopped for detected broken messages.
-	@Test
-	public void test2() throws SocketException, UnknownHostException {
-    System.out.println(String.format("----- Testing Elevator System -----"));
-		
-		final Scheduler server = new Scheduler(8080);
-		final Elevator elevator = new Elevator(1);
-		final Floor floor = new Floor();
-		final Elevator elevator2 = new Elevator(2);
-		
-		//Start three threads.
-		new Thread(server).start();
-		new Thread(elevator).start();
-		new Thread(floor).start();
-		new Thread(elevator2).start();
+        Assert.assertTrue(inputFloors.containsAll(floors) && inputFloors.containsAll(floors2) 
+        		&& inputFloors.containsAll(floors3) && inputFloors.containsAll(floors4));
+        
+        
+        
 		
 		//Initialize the counter for broken elevators.
 		int broken = 0;
@@ -199,9 +209,9 @@ public class TestElevator {
 		//compare the number of broken elevators with scheduler.
 		broken += elevator.broken;
 		broken += elevator2.broken;
-		Assert.assertEquals(broken, brokenList.size());			
-			
-		
+		broken += elevator3.broken;
+		broken += elevator4.broken;
+		Assert.assertEquals(broken, brokenList.size());		
 	}
 	
 	
