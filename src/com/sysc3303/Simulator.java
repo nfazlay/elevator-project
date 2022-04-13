@@ -16,13 +16,13 @@ public class Simulator {
 	public static void main(String[] args) throws SocketException, UnknownHostException {
 		System.out.println(String.format("----- Simulating Elevator System -----"));
 		final Scheduler server = new Scheduler(8080);
-		final Elevator elevator = new Elevator(1);
-		final Elevator elevator2 = new Elevator(2);
 		final Floor floor = new Floor();
 		
 		new Thread(server).start();
-		new Thread(elevator).start();
-		new Thread(elevator2).start();
+		for (int i = 1; i < 5; i++) {
+			final Elevator elevator = new Elevator(i);
+			new Thread(elevator).start();
+		}
 		new Thread(floor).start();
 		
 	}
