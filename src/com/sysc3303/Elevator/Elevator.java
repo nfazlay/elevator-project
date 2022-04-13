@@ -43,6 +43,7 @@ public class Elevator implements Runnable {
     private boolean passenger;
 	public ArrayList<StateMessage> outputs;
 	private int id;
+	public int broken;
     
 
     /**
@@ -204,6 +205,7 @@ public class Elevator implements Runnable {
             }
             else if (receivedMessage.getType() == MessageType.BROKEN) {
             	System.out.println("ELEVATOR: " + id + " is Broken. Closing connection.");
+            	broken++;
             	break;
             }
             else {
