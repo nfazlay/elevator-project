@@ -41,7 +41,8 @@ public class Elevator implements Runnable {
     private int floor;
     private String dir;
     private boolean passenger;
-	public ArrayList<StateMessage> outputs;
+	public ArrayList<StateMessage> outputs = new ArrayList<StateMessage>();
+	private StateMessage message;
 	private int id;
 	public int broken;
     
@@ -178,8 +179,10 @@ public class Elevator implements Runnable {
 	    	}
             //send state to scheduler
             messageToSend = new StateMessage(id, currState, currFloor, passenger? lamp: floor);
+            message = new StateMessage(id, currState, currFloor, passenger? lamp: floor);
             sendToSystem(messageToSend, Systems.SCHEDULER);
             System.out.println("ELEVATOR: " + id +  " Packet sent.");
+            outputs.add(message);
 		    
 		    
 		    //receive message from scheduler
