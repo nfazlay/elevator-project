@@ -33,8 +33,7 @@ public class Scheduler implements Runnable {
     private Queue<DatagramPacket> floorPackets = new LinkedList<DatagramPacket>();
     private ElevatorList elevators;
     public ElevatorList brokenElevators;
-    private SchedulerState currState; 
-    public ArrayList<Systems> broken;
+    private SchedulerState currState;
     
     /**
      * Constructor for Scheduler server
@@ -133,7 +132,6 @@ public class Scheduler implements Runnable {
 										Data brokenMsg = new BrokenMessage("Broken");
 										sendToSystem(brokenMsg, Systems.ELEVATOR, receivePacket.getAddress(),
 												receivePacket.getPort());
-										broken.add(Systems.ELEVATOR);
 									}
 									else {
 										//add probaility to elevator for the current data until
@@ -178,7 +176,6 @@ public class Scheduler implements Runnable {
 									Data brokenMsg = new BrokenMessage("Broken");
 									sendToSystem(brokenMsg, Systems.ELEVATOR, receivePacket.getAddress(),
 											receivePacket.getPort());
-									broken.add(Systems.ELEVATOR);
 							}
 							break;
 						case FLOOR:

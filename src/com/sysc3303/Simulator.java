@@ -19,7 +19,7 @@ public class Simulator {
 		final Floor floor = new Floor();
 		
 		new Thread(server).start();
-		for (int i = 1; i < 5; i++) {
+		for (int i = 1; i < 6; i++) {
 			final Elevator elevator = new Elevator(i);
 			new Thread(elevator).start();
 		}
